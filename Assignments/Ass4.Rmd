@@ -1,0 +1,198 @@
+---
+title: 'MA 415: Assignment 4'
+author: "Rachel Feingold"
+date: "2/5/2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Problem 1: Warm Up
+a. Write a function which takes a numeric vector x and returns a named list containing the mean, median and variance of the values in x
+```{r}
+stats <- function(x, plot = FALSE)
+{
+  if(is.numeric(x)==FALSE) # need to filter out character vectors!\
+    stop("Invalid Input. summ() only accepts numeric vectors")
+  st =  list(Mean=mean(x), Median=median(x), Variance =var(x))
+  if(plot==TRUE)
+  {
+    plot(x)
+    abline(h=st[["Mean"]])
+    }  
+   return (st) 
+}
+
+stats(1:9)
+```
+b. Write a function with arguments x and n which evaluates sum(i=0 to n):((e^-x)(x^i))/ (i!)
+
+```{r}
+partb <- function(x,n)
+{
+  for(i in 0:n){
+    s <- sum(((exp(-x)*(x^i))/ (factorial(i))))
+    return(s)
+  }
+}
+partb(2,2)
+```
+
+c. Write a fucntion which goes through every entry in a list, checks whether it is a character vector
+
+```{r}
+is.char <- function(l)
+{
+  if (is.list(l)==FALSE)
+    stop("Invalid Input. Must enter a list")
+for (x in l){
+  if(is.character(x)==TRUE)
+    print(x)
+}
+}
+list <- list(c(4:6), "cat", "dog", 6, "pie")
+is.char(list)
+list <- list("cat", 5, 7, "dog")
+is.char(list)
+```
+
+d. Write a function with an argument k which stimulates a symmetric walk on the intergers, stopping when the walk reaches k (or -k). A random walk on the integers is a sequence X1, X2, ..., with X0 =0 and Xi = Xi+1 + Di where Di are independent with P(Di=1)=P(Di=-1)= 0.5
+
+```{r}
+r.walk <- function(k)
+{
+  r=0
+  print(r)
+  x <-  c(-1,1)
+  while (abs(r)<k){
+  
+    y <-  sample(x,1)
+    r <- r + y
+    print(r)
+  }
+  }
+r.walk(4)
+r.walk(2)
+```
+
+Problem 2. Moving Averages 
+
+a. Write a function to calculate the moving averages of length 3 of a vector (x1,...,xn)^T.
+(The function returns (z1,...,zn)^T) where zi = (1/3) (xi+xi+1+xi+2), i=1, ...., n-2
+Call this function ma3
+
+```{r}
+ma3 <- function(xVec){
+  if (is.numeric(xVec)==FALSE){
+    stop("Invalid Input. Please enter a numeric vector")}
+  n <- length(xVec)
+  z <- ( xVec[1:(n-2)]+xVec[2:(n-1)]+xVec[3:n])/3
+  return(z)
+}
+ma3(c(1:5,6:1))
+```
+
+b. Write a function which takes two arguments, x and k, and calculates the moving average of x for length k
+
+```{r}
+ma.k <- function(x,k){
+  if (is.numeric(x)==FALSE){
+    stop("Invalid Input. Please enter a numeric vector")}
+  z <- filter(x,rep(1/k,k))
+if (k==1){
+  stop("Invalid Input. K must be greater than 1.")
+}
+if ((length(k)<length(x))==TRUE){
+  stop("Invalid Input. K cannot be larger than or equal to x.")
+}
+  return(z)
+}
+#ma.k(c(1,2,3,4,5,6),3)
+
+#ma.k(c(1:3),1)
+```
+c. How does your function behave if k is larger than (or equal to) the length of x?
+There is an error message that says: Error in filter(x, rep(1/k, k)) : 'filter' is longer than time series.
+
+d. You should return an error, use the stop() function. Are there other choices?
+Error message included.
+
+e. How does your function behave if k=1? What should you do? Fit it if necessary?
+If k =1, then the error message pops up saying that k cannot be larger than or equal to x. To fix it, we should say that k must be greater than 1. 
+
+Problem 3. Optional Plot
+
+Continuous functions:
+f(x) = x^2 + 2x+3 if x<0
+     = x+3 if 0 <=x<2
+     = x^2 +4x-7 if x>=2
+     
+Write a function which takes a vector and returns a vector of the values f(x). 
+The function should be valid for inputs where -4 < x < 4.
+The function should check the input for validity and offer the user the option of plotting the values the function returns
+
+```{r}
+prob2 <- function(x, plot = FALSE)
+  {
+  if (-4 < x & x < 0){
+    z = ((x^2)+2*x+3)
+    return(z)
+  }
+  if (0 <= x & x < 2){
+    z = (x+3)
+    return(z)
+  }
+  if (2 <= x & x < 4){
+    z = ((x^2)+4*x-7)
+    return(z)
+  }
+  if(plot==TRUE){
+    plot(x)
+    }  
+  else{
+    stop("Input Invalid. Please enter a number between -4 and 4.")
+  }
+}
+prob2(0)
+#prob2(-4)
+prob2(2,TRUE)
+prob2(1)
+prob2(3)
+#prob2(5)
+```
+
+Problem 4. Matrix Input
+
+Write a function which takes a single argument, a matrix or an arguments that can be coerced into a matrix 
+and return a matrix which is the same as the function of the argument, but every odd number is doubled
+
+```{r}
+
+double <- function(mat)
+{
+  x = nrow(mat)
+  y = ncol(mat)
+  for(i in 1:x){
+    for(j in 1:y){
+      if(mat[i,j]%%2==1){
+      mat[i,j] = mat[i,j]*2
+      }
+      }
+  }
+  return(mat)
+}
+matrix1 <- matrix(c(2,-4,-5,7), nrow = 4,ncol = 4 ,byrow = TRUE)
+double(matrix1)
+```
+
+<!-- Problem 5. Poisson Process -->
+
+<!-- A Poisson process of rate L is a random vector of times (T1,T2 ,T3 ,...) where the interarrival times T1 ,T2−T1 ,T3−T2 ,... are independent exponential random variables with paramerter L . Note that this implies Ti+1 > Ti -->
+
+<!-- a. Write a function with arguments L and M which generates a Poisson process up until the time reaches M.  -->
+<!-- Use the rexp() family.  -->
+
+
+<!-- b. Generate 10,000 of these series with L=5 and M=1 . Record the lengths of each of the 10,000 vectors returned. Plot the vector lengths as a histogram. Calculate their mean and variance. How do you think the lengths are distributed? Explain. -->

@@ -1,0 +1,88 @@
+---
+title: "NOAA Buoy Data Analysis"
+author: "Rachel Feingold"
+date: "2/27/2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Using at least 20 years of NOAA buoy data (pick any buoy you like), estimate the long term linear trend in air temperature. 
+For the linear regression model air temperature vs time, the errors (the Epsilons) are assumed to be independent and identically distributed. We examine them to see if they are normally distributed and  if theres is constant variance and their mean = 0.
+Since this data is a time series, we know that the correlated observation over time are not independent, we want to see if the relationship is sinusoidal. This can be predicted because air temperature correlated with the yearly cyclical seasons.
+
+I picked buoy 44007 off the coast of Portland, ME
+
+This is reading one year (2016) of buoy data.
+  1. Read table without header because you need the first row of data included in the document. This function creates a data frame from the web     file.
+  2. Need to read the column names, set the column names as a character vector, "header""
+  3. Create buoy data frame from the web file, without the header
+  4. Need to reattach the header, which are the column names
+  ** SO we will be looking at the buoy data frame
+```{r}
+a <- read.table("http://www.ndbc.noaa.gov/view_text_file.php?filename=44007h2016.txt.gz&dir=data/historical/stdmet/", header = FALSE)
+fyl <- "http://www.ndbc.noaa.gov/view_text_file.php?filename=44007h2016.txt.gz&dir=data/historical/stdmet/"
+header <- scan(fyl,nlines=1,what=character())
+buoy <- read.table(fyl,skip=2,header=FALSE)
+
+colnames(buoy)<-header
+head(buoy)
+```
+Now we want to look at the data overa period of years (1982-1999). After 1999, 17 variables are observed, limitation of this loop technique to extract data.
+
+```{r}
+str1 = "http://www.ndbc.noaa.gov/view_text_file.php?filename="
+str2 = ".txt.gz&dir=data/historical/stdmet/"
+buoynum <- "44007"
+
+# years to read since data layout was the same for these years
+y1 <- 1982
+y2 <- 1999
+
+data <- NULL
+
+
+while(y1<=y2){
+  # make the file name
+  fyl <- paste0(str1,buoynum,"h",y1,str2)
+  
+  # read the column names # scan first line so it becomes the header line
+  header <- scan(fyl,nlines=1,what=character())
+  
+  # read the data
+  buoy <- read.table(fyl,skip=2,header=FALSE)
+  
+  # re-attach the column names
+  colnames(buoy)<-header
+  
+  # re-assign 999 as NA
+  buoy$ATMP[buoy$ATMP==999]<-NA
+  
+  # add the data to the variable # data is where we are colleccting the observations
+  data<-c(data,buoy$ATMP)
+  
+  # write the year to the screen
+  cat(paste(y1))
+  
+  # increment the year
+  y1<-y1+1
+}
+
+# built in plots
+plot(data,type="l")
+
+mm<-c(1:length(data))
+
+# linear regression
+reg1<-lm(data~mm)
+
+# output linear regression
+summary(reg1)
+```
+
+What are your findings?
+  The sinusoidal regression between time and air temperature is consistent with our predictions. On earth we experience seasons, cyclical periods of warming and colding. This constant and consistent change is reflected in the regression. 
+
+Ggplot time series plot with a time axis that you have produced with lubridate: 
