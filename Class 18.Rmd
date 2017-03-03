@@ -82,4 +82,6 @@ when open the file, will be looking at mod1, because that is where head is point
 git doesnt know about these modifications 
 
 
+TO MAKE CHANGE IN R AND THEN TO GITHUB
+save file, commit changes, then push 
 
