@@ -1,0 +1,85 @@
+---
+title: "Class 18"
+author: "Rachel Feingold"
+date: "3/3/2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Brand new workflow and directory 
+Start with a text tilfe
+Text file
+want to establish it as a project in R studio as well as git in the same directory
+set it up with git in new directory in  r studio
+in git hub: create a new repository 
+ignore readme hint
+
+on git tab in rs tudio 
+commit lorem.txt 
+(now you are just local- have git in the local directory)
+in colnsole: set up github for the project, set up remote 
+git remote add origin http://github.com/rfeingold18/MA415
+see if its worked: git remote -v (will get two orgiin lines with url)
+
+open txt file
+make a modification 
+save it 
+can check the box in the git window and commit it 
+need a message always 
+
+to push onto remote repository:
+git push -u origin master 
+
+will ask you to enter username an dpw
+
+
+**git will add some lines to configuration
+to see that:
+git config --list 
+can see all parameters you've seen in git 
+
+git status
+(will tell you whats being traacked and if there are files being staged for update)
+git log 
+(prettey verbose, will show you all commits )
+git log --oneline
+better if git log --oneline-- decorate
+each commit had own set of numbers used to identify content of commit 
+
+git tag -a v1.a 023bbdc 
+asking you for a comment (like when committing) but you are outside R studio, if not specifying editor you like, will get old editor vi
+to add lines or insert lines: 
+"a now in text edit mode
+"This is an early version of the text file" hit "esc" go into command mode hit ":" "wq" (write and quit) and its done 
+
+*should define editor, look at progit will help w this
+
+set up a tag 
+git tag
+"show yo uahvea  tag at v1"
+
+git log --oneline -- decorate
+will show you the tag, as if you were typing the entire hash for that particular commit
+
+git log --oneline --decorate
+head means: when open this file you will get whatever the ehad is pointed to 
+
+switch this to mod 1
+git checkout mod1
+switch to brand mod1
+git log --oneline --decorate will show tou the same message for commit but the header is different 
+
+1 created text file
+created repository for it in cloud
+pushed repositiory in cloud
+made edits w commit
+have opened a modification of file (mod1) which is still the same
+when open the file, will be looking at mod1, because that is where head is pointing to
+
+git doesnt know about these modifications 
+
+
+
