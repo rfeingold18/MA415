@@ -8,6 +8,7 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+Notes on commiting and pushing stuff onto github
 
 Brand new workflow and directory 
 Start with a text tilfe
@@ -85,3 +86,7 @@ git doesnt know about these modifications
 TO MAKE CHANGE IN R AND THEN TO GITHUB
 save file, commit changes, then push 
 
+if branch is ahead of master by one commit:
+you havent committed yet, need to commit 
+
+use merge- way to resolve all editions 
