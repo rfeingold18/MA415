@@ -1,0 +1,61 @@
+---
+title: "MA415 Midterm Project"
+author: "Rachel Feingold"
+date: "3/7/2017"
+output: pdf_document
+---
+Instructions:
+
+Prepare the OSHA data and create a dataset for analysis.
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Libraries Needed:
+```{r}
+library(foreign)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lubridate)
+library(stringr)
+library(magrittr)
+library(data.table)
+```
+
+
+Reading Data:
+```{r}
+osha <- read.dbf("osha.dbf")
+accidents <- read.dbf("accid.dbf")
+violations <- read.dbf("viol.dbf")
+hazsub <- read.dbf("hazsub.dbf")
+```
+
+Cleaning Data
+
+1. First, I cleaned the OSHA table. I am starting with this one because it is the main table and it has the company names, address, date of inspection, and other descriptive information about the companies.
+2. Then, I cleared all the NA data using a loop. This deleted two columns
+```{r} 
+indi = rep(0,ncol(osha))
+for(i in 1: ncol(osha)){indi[i] = sum(!is.na(osha[,i]))}
+which(indi==0)
+
+tidyosha = osha[,-c(which(indi==0))]
+rm(indi,osha)
+```
+3. Then, I checked to see which variables were stable, meaning that all the values were the same for each row.
+```{r}
+table(tidyosha$CONTFLAG) 
+table(tidyosha$PREVCTTYP) 
+table(tidyosha$PREVACTNO) 
+table(tidyosha$REPORTID)
+table(tidyosha$OPTREPTNO) #discard
+table(tidyosha$NAICS) 
+table(tidyosha$NAICSEC) 
+table(tidyosha$NAICSINS)
+table(tidyosha$SITESTATE) #discard
+table(tidyosha$OWNERCODE)
+table(tidyosha$WHYNOINSP)
+
+```
+Organizing Data
