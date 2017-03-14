@@ -12,50 +12,69 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 Libraries Needed:
 ```{r}
-library(foreign)
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(lubridate)
-library(stringr)
-library(magrittr)
-library(data.table)
+require(foreign)
+require(dplyr)
+require(tidyr)
+require(ggplot2)
+require(lubridate)
+require(stringr)
+require(magrittr)
+require(data.table)
 ```
 
 
 Reading Data:
 ```{r}
 osha <- read.dbf("osha.dbf")
-accidents <- read.dbf("accid.dbf")
-violations <- read.dbf("viol.dbf")
-hazsub <- read.dbf("hazsub.dbf")
+# accidents <- read.dbf("accid.dbf")
+# violations <- read.dbf("viol.dbf")
+# hazsub <- read.dbf("hazsub.dbf")
+# history <- read.dbf("history.dbf")
+# admpay <- read.dbf("admpay.dbf")
+
 ```
 
 Cleaning Data
 
 1. First, I cleaned the OSHA table. I am starting with this one because it is the main table and it has the company names, address, date of inspection, and other descriptive information about the companies.
-2. Then, I cleared all the NA data using a loop. This deleted two columns
+
+2. Then, I selected the variables (columns) I deemed most important to the analysis of the most dangerous places to work in Massachusetts. I dropped the rest. 
 ```{r} 
-indi = rep(0,ncol(osha))
-for(i in 1: ncol(osha)){indi[i] = sum(!is.na(osha[,i]))}
-which(indi==0)
-
-tidyosha = osha[,-c(which(indi==0))]
-rm(indi,osha)
+tidyosha <- osha[-c(1:4, 9:11, 14:15, 17, 19:20, 22:24, 27:33, 35:59, 61:63, 68:77, 80:92) ]
 ```
-3. Then, I checked to see which variables were stable, meaning that all the values were the same for each row.
+3. Then, I checked to see which variables were stable, meaning that the value of the variables don't change at all. I could discard 6 variables. However, we want to extract the stable information of the data set just in case. Afterwards, I dropped the stable variables. 
 ```{r}
-table(tidyosha$CONTFLAG) 
-table(tidyosha$PREVCTTYP) 
-table(tidyosha$PREVACTNO) 
-table(tidyosha$REPORTID)
 table(tidyosha$OPTREPTNO) #discard
-table(tidyosha$NAICS) 
-table(tidyosha$NAICSEC) 
-table(tidyosha$NAICSINS)
 table(tidyosha$SITESTATE) #discard
-table(tidyosha$OWNERCODE)
-table(tidyosha$WHYNOINSP)
+table(tidyosha$EMPCOUNT) #discard
+table(tidyosha$EMPCOVERED) #discard
+table(tidyosha$NATEMPCNT)#discard
+table(tidyosha$LWDIRATE) #discard
 
+StableInfo = tidyosha[,c("OPTREPTNO","SITESTATE", "EMPCOUNT", "EMPCOVERED", "NATEMPCNT", "LWDIRATE")][1,]
+
+dr = function(name){return(which(colnames(tidyosha)==name))}
+tidyosha = tidyosha[,-c(dr("OPTREPTNO"),
+                        dr("SITESTATE"),
+                        dr("EMPCOUNT"),
+                        dr("EMPCOVERED"),
+                        dr("NATEMPCNT"),
+                        dr("LWDIRATE"))]
+rm(i,dr)
+```
+4. Then, I chose from the remaining variables, which would be the most useful for analysis. 
+```{r}
+tidyosha =tidyosha[,c(dr(""))]
+
+```
+5. Next, I cleaned accidents. From scanning the database in the view function, there are no columns with all NA data. So I just looked for stable variables.
+```{r} 
+table(accidents$SITESTATE) #discard
+# table(accidents$OCC_CODE)
+
+dr = function(name){return(which(colnames(accidents)==name))}
+accidents = accidents[,-c(dr("SITESTATE"))]
+               
+rm(i,dr)
 ```
 Organizing Data
