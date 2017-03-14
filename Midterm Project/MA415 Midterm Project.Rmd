@@ -21,13 +21,13 @@ require(stringr)
 require(magrittr)
 require(data.table)
 ```
-
-
 Reading Data:
+
+I only read the data that was neccessary to the analysis of the most dangerous places to work in Massachusetts.
 ```{r}
 osha <- read.dbf("osha.dbf")
-# accidents <- read.dbf("accid.dbf")
-# violations <- read.dbf("viol.dbf")
+accidents <- read.dbf("accid.dbf")
+violations <- read.dbf("viol.dbf")
 # hazsub <- read.dbf("hazsub.dbf")
 # history <- read.dbf("history.dbf")
 # admpay <- read.dbf("admpay.dbf")
@@ -38,43 +38,20 @@ Cleaning Data
 
 1. First, I cleaned the OSHA table. I am starting with this one because it is the main table and it has the company names, address, date of inspection, and other descriptive information about the companies.
 
-2. Then, I selected the variables (columns) I deemed most important to the analysis of the most dangerous places to work in Massachusetts. I dropped the rest. 
+2. Then, I selected the variables (columns) I deemed most important to the analysis and I discarded the rest. 
 ```{r} 
 tidyosha <- osha[-c(1:4, 9:11, 14:15, 17, 19:20, 22:24, 27:33, 35:59, 61:63, 68:77, 80:92) ]
+rm(osha)
 ```
-3. Then, I checked to see which variables were stable, meaning that the value of the variables don't change at all. I could discard 6 variables. However, we want to extract the stable information of the data set just in case. Afterwards, I dropped the stable variables. 
+3. Next, I cleaned the data from the accidents table. 
 ```{r}
-table(tidyosha$OPTREPTNO) #discard
-table(tidyosha$SITESTATE) #discard
-table(tidyosha$EMPCOUNT) #discard
-table(tidyosha$EMPCOVERED) #discard
-table(tidyosha$NATEMPCNT)#discard
-table(tidyosha$LWDIRATE) #discard
-
-StableInfo = tidyosha[,c("OPTREPTNO","SITESTATE", "EMPCOUNT", "EMPCOVERED", "NATEMPCNT", "LWDIRATE")][1,]
-
-dr = function(name){return(which(colnames(tidyosha)==name))}
-tidyosha = tidyosha[,-c(dr("OPTREPTNO"),
-                        dr("SITESTATE"),
-                        dr("EMPCOUNT"),
-                        dr("EMPCOVERED"),
-                        dr("NATEMPCNT"),
-                        dr("LWDIRATE"))]
-rm(i,dr)
+tidyaccid <- accidents[-c(2:5,8,13,15:16)]
+rm(accidents)
 ```
-4. Then, I chose from the remaining variables, which would be the most useful for analysis. 
+4. Next, I cleaned the violations table. 
 ```{r}
-tidyosha =tidyosha[,c(dr(""))]
-
+tidyviol <- violations[-c(2:7, 11, 13:15, 17, 19:48)]
+rm(violations)
 ```
-5. Next, I cleaned accidents. From scanning the database in the view function, there are no columns with all NA data. So I just looked for stable variables.
-```{r} 
-table(accidents$SITESTATE) #discard
-# table(accidents$OCC_CODE)
 
-dr = function(name){return(which(colnames(accidents)==name))}
-accidents = accidents[,-c(dr("SITESTATE"))]
-               
-rm(i,dr)
-```
-Organizing Data
+Organizing Data 
