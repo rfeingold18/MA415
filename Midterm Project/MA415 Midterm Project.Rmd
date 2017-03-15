@@ -33,6 +33,11 @@ violations <- read.dbf("viol.dbf")
 # admpay <- read.dbf("admpay.dbf")
 
 ```
+I also needed to read in the data from lookups, in order to retrieve informations on the coding and different character levels of the various variables.
+```{r}
+acc <- read.dbf("lookups/acc.dbf")
+hzs <- read.dbf("lookups/hzs.dbf")
+```
 
 Cleaning Data
 
@@ -48,10 +53,36 @@ rm(osha)
 tidyaccid <- accidents[-c(2:5,8,13,15:16)]
 rm(accidents)
 ```
-4. Next, I cleaned the violations table. 
+4. Then, I turned the character variables that had many levels, assigned names to the levels, if there weren't many. If there were many levels, the layout file with descriptions of the variables usually references the lookups dbf's. I would then use the .dbf to help name the levels, and eventually delete the redundant columns. 
+```{r}
+levels(tidyaccid$DEGREE) <- c("no injury", "fatality", "hospitalized", "nonhospitalized")
+
+natureinj <- acc[(acc$CATEGORY=="NATUR-INJ"),]
+natureinj <- select(natureinj, CODE, VALUE)
+colnames(natureinj) <- c("NATURE", "VALUE")
+tidyaccid <- left_join(tidyaccid, natureinj, by = "NATURE")
+tidyaccid <- select(tidyaccid, -NATURE)
+names(tidyaccid)[8] <- "NATURE-INJ"
+
+injsource <- acc[(acc$CATEGORY=="SOURC-INJ"),]
+injsource <- select(injsource, CODE, VALUE)
+colnames(injsource) <- c("SOURCE", "VALUE")
+tidyaccid <- left_join(tidyaccid, injsource, by = "SOURCE")
+tidyaccid <- select(tidyaccid, -SOURCE)
+names(tidyaccid)[8] <- "INJ-SOURCE"
+
+
+
+
+
+```
+
+
+7. Next, I cleaned the violations table. 
 ```{r}
 tidyviol <- violations[-c(2:7, 11, 13:15, 17, 19:48)]
 rm(violations)
 ```
+
 
 Organizing Data 
