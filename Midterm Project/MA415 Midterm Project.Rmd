@@ -28,7 +28,7 @@ I only read the data that was neccessary to the analysis of the most dangerous p
 osha <- read.dbf("osha.dbf")
 accidents <- read.dbf("accid.dbf")
 violations <- read.dbf("viol.dbf")
-# hazsub <- read.dbf("hazsub.dbf")
+ hazsub <- read.dbf("hazsub.dbf")
 # history <- read.dbf("history.dbf")
 # admpay <- read.dbf("admpay.dbf")
 
@@ -71,9 +71,31 @@ tidyaccid <- left_join(tidyaccid, injsource, by = "SOURCE")
 tidyaccid <- select(tidyaccid, -SOURCE)
 names(tidyaccid)[8] <- "INJ-SOURCE"
 
+etype <- acc[(acc$CATEGORY=="EVENT-TYPE"),]
+etype <- select(etype, CODE, VALUE)
+colnames(etype) <- c("EVENT", "VALUE")
+tidyaccid <- left_join(tidyaccid, etype, by = "EVENT")
+tidyaccid <- select(tidyaccid, -EVENT)
+names(tidyaccid)[8] <- "TYPE-EVENT"
 
+envfac <- acc[(acc$CATEGORY=="ENVIR-FAC"),]
+envfac <- select(envfac, CODE, VALUE)
+colnames(envfac) <- c("ENVIRON", "VALUE")
+tidyaccid <- left_join(tidyaccid, envfac, by = "ENVIRON")
+tidyaccid <- select(tidyaccid, -ENVIRON)
+names(tidyaccid)[8] <- "ENVIR-FAC"
 
+humfac <- acc[(acc$CATEGORY=="HUMAN-FAC"),]
+humfac <- select(humfac, CODE, VALUE)
+colnames(humfac) <- c("HUMAN", "VALUE")
+tidyaccid <- left_join(tidyaccid, humfac, by = "HUMAN")
+tidyaccid <- select(tidyaccid, -HUMAN)
+names(tidyaccid)[8] <- "HUMAN-FAC"
 
+names(tidyaccid)[3] <- "CODE"       # Needed to rename the column to do a join with the lookups code dbf
+tidyaccid <- left_join(tidyaccid, hzs, by = "CODE") 
+tidyaccid <- select(tidyaccid, -CODE)
+names(tidyaccid)[8] <- "HAZ-SUB"
 
 ```
 
