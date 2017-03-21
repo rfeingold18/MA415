@@ -5,14 +5,15 @@ date: "3/7/2017"
 output: pdf_document
 ---
 ##Instructions:
-
 Prepare the OSHA data and create a dataset for analysis.
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-Libraries Needed:
+##Reading Data:
+
+## Libraries Needed:
 ```{r}
-require(foreign)
+require(foreign) # the require functions loads and attached the add on packages needed for the rest of the program, better than library
 require(dplyr)
 require(tidyr)
 require(ggplot2)
@@ -21,9 +22,16 @@ require(stringr)
 require(magrittr)
 require(data.table)
 ```
-##Reading Data:
 
 I only read the data that was neccessary to the analysis of the most dangerous places to work in Massachusetts.
+The data tables I choose to include in the final dataset were:
+
+  Osha.dbf- I chose this data table because it was the main table with the companys names, addresses, inspection dates and other descriptions information about the comapnies. 
+  Accid.dbf- I chose this data table because it had details about the accidents, which is clearly related to the dangerous levels of workplaces in Massachusetts. I extracted the variables: ACTIVITYNO DEGREE, NATURE, SOURCE, EVENT, ENVIRON, HUMAN, and HAZSUB. 
+  Viol.dbf- I chose this data table because it had details on the violations of each inspection. If a company has more violations during an OSHA inspection, then a workplace may be more dangerous to work at. I extracted the variables: ACTIVITYNO, EMPHASIS, PENCURRENT, VIOLTYPE, INSTANCES, and NUMEXPOSED. 
+  History.dbf- I chose this data table because it had details on the history of the penalties imposed on the company and other violations. If a company has many penalties, this may be related to how it complies to safety and health regualtions. I extracted the variables: ACTIVITYNO, HISTTYPE, HISTEVENT, HISTVTYPE, and FTAEVENT. 
+  Relact.dbf- I chose this data table because it had details on whether the inspection was related to another inspection or other action. This can give more information on whether a company is compliant with OSHA guidelines. I extracted the variables: ACTIVITYNO, RELTYPE, SAFETY, and HEALTH.
+
 ```{r}
 osha <- read.dbf("osha.dbf")
 accidents <- read.dbf("accid.dbf")
@@ -39,11 +47,30 @@ sic <- read.dbf("lookups/sic.dbf")
 scc <- read.dbf("lookups/scc.dbf")
 ```
 
-Cleaning Data
+##Cleaning Data
 
-1. First, I cleaned the OSHA table. I am starting with this one because it is the main table and it has the company names, address, date of inspection, and other descriptive information about the companies.
+First, I cleaned the OSHA table. I selected the variables (columns) I deemed most important to the analysis and I discarded the rest. Kept variables included:
+PREVCTTYP- type of most recent OSHA activity (accident, none, complaint, inspection, referral)
+ACTIVITYNO- unique identifier for each inspection record
+REPORTID- unique identification code, one for each federal and state office submitting compliance data
+ESTABNAME- name of company/establishment
+SITECITY- Depertment of Commerce city code establishment is in
+SITECNTY- Department of Commerce county code establishment is in
+SITEZIP- zipcode of the establishment
+OWNERTYPE- type of owner of company (private, local government, state government, federal government)
+ADVNOTICE- whether an advanced notice of the inspection of given 
+CAT_SH- safety or health codes
+INSPTYPE- type of inspection (unprogrammed: fatality/ catashrophe, complaint, referral, monitoring, follow-up, etc; Programmed: planned, related, etc)
+INSPSCOPE- how indepth the inspection was (comprehensive, partial, records only, none)
+WHYNOINSPC- if there was no inspection, reason for such (estb. not found, denied entry, employer out of business, etc.) 
+PASUMHOURS- sum of all inspection activity hours reported 
+TOTPENLTY- total current penalities issued
+TOTALFTA- total failure to abate (FTA) penalties issued
+TOTALVIOLS- total number of violations issued
+TOTSERIOUS- total number of serious, willful, and repeat violations issued for inspection
 
-2. Then, I selected the variables (columns) I deemed most important to the analysis and I discarded the rest. I also turned the character variables that had many levels, assigned names to the levels, if there weren't many. If there were many levels, the layout file with descriptions of the variables usually references the lookups dbf's. I would then use the .dbf to help name the levels, and eventually delete the redundant columns. 
+
+I also turned the character variables that had coding levels, and assigned names to these levels based on the layout text files. In other instances I used the the layout file with descriptions of the variables usually references the lookups dbf's. I would then use the .dbf to help name the levels, and eventually delete the redundant columns. 
 ```{r} 
 tidyosha <- osha[-c(1:4, 6, 9:11, 14:15, 17, 19:20, 22:24, 27:33, 35:59, 61:63, 68:76, 80:92) ]
 rm(osha)
@@ -60,6 +87,15 @@ tidyosha <- select(tidyosha, -SIC)
 rm(sic)
 ```
 3. Next, I cleaned the data from the accidents table. 
+I kept the variables: 
+ACTIVITYNO- unique identifier for each inspection record
+DEGREE- extent of injury (fatal, hospoitalized, nonhispitalized)
+NATURE- nature of the injury (physical characteristics of the injury)
+SOURCE- cause/source of injury
+EVENT- event/action that caused the injury
+ENVIRON- contributing factor of the injury 
+HUMAN- any human factory involved in the injury
+HAZSUB- any hazardous substances contributing to the incident
 ```{r}
 tidyaccid <- accidents[-c(2:5,8,13,15:16)]
 rm(accidents)
@@ -116,7 +152,16 @@ names(tidyaccid)[8] <- "HAZ-SUB"
 ```
 
 
-5. Next, I cleaned the violations table. I also changed the character variables that were encoded with codes instead of their actual names. 
+5. Next, I cleaned the violations table. I kept the variables:
+ACTIVITYNO- unique identifier for each inspetion record
+EMPHASIS- whether violation was egregious (outstandingly bad)
+GRAVITY- level of potential arm to worker (scale of 1-10)
+PENCURRENT- total amount OSHA collected or expects to collect from violations
+VIOLTYPE- type of violation (repeat, serious, unclassified, willful, other)
+INSTANCES- number of unstances of violation of standard related event
+NUMEXPOSED- humber of employees exposed to hazard violate
+
+I also changed the character variables that were encoded with codes instead of their actual names. 
 ```{r}
 tidyviol <- violations[-c(2:7, 11, 13:15, 17, 19:48)]
 rm(violations)
@@ -145,7 +190,7 @@ levels(tidyrelact$SAFETY) <- c("Satisfied")
 levels(tidyrelact$HEALTH) <- c("Satisfied")
 ```
 ##Organizing Data 
-1. After cleaning the most useful databases, I need to join the tables together, using OSHA as the base. The common variable throughout all the tables is AVTIVITYNO, which we use to join the columns by. 
+1. After cleaning the most useful databases, I need to join the tables together, using OSHA as the base. The common variable throughout all the tables is AVTIVITYNO, which I used to join the columns. Some numbers in the ACTIVITYNO field appear more than once because an inspection may have more violations than one record can contain. This is more evident of a dangerous place to work because it means a lot of violated activity happened at this company. 
 ```{r}
 master <- full_join(tidyosha, tidyaccid, by ="ACTIVITYNO")
 master <- full_join(master, tidyviol, by = "ACTIVITYNO")
@@ -176,13 +221,15 @@ quant <- select(unimaster)
 # Group all the Quantitative data in a subset dataset
 
 
-summarise(unimaster, funs(mean()))
-
-quant <- subset(
+# summarise(unimaster, funs(mean()))
+# 
+# quant <- subset(
 set = subset(unimaster, subset = INSPTYPE=="Complaint")
-table(set$PASUMHOURS)
-set$PASUMHOURS <- set$PASUMHOURS==0
-ggplot(data=set, aes(x = PASUMHOURS)) + geom_histogram()
+# table(set$PASUMHOURS)
+# set$PASUMHOURS <- set$PASUMHOURS==0
+is.na(o$PASUMHours) <- !o$pasumhours
+
+ggplot(data=unimaster, aes(x = PASUMHOURS)) + geom_histogram() + xlim(c(1,100))
 # The majority of the values are 0's which is okay. This does not mean that the total sum of inspection activity for these records was 0, it just means that the data was not recorded. 
 
 ```
